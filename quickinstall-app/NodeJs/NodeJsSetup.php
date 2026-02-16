@@ -10,31 +10,31 @@ use Hestia\System\HestiaApp;
 class NodeJsSetup extends BaseSetup {
 
 	protected const TEMPLATE_PROXY_VARS = ['%nginx_port%'];
-	protected const TEMPLATE_ENTRYPOINT_VARS = ['%app_name%', '%app_start_script%', '%app_cwd%'];
+	protected const TEMPLATE_ENTRYPOINT_VARS = ['%app_name%', '%app_start_script%', '%app_cwd%', '%app_port%'];
 
 	protected $nodeJsPaths;
 	protected $nodeJsUtils;
-    protected $appInfo = [ 
+    protected $appInfo = [
         'name' => 'NodeJs',
         'group' => 'node',
         'enabled' => true,
-        'version' => '1.0.0',
+        'version' => '2.0.0',
         'thumbnail' => 'nodejs.png'
     ];
     protected $appname = 'NodeJs';
     protected $config = [
         'form' => [
-            'node_version' => [ 
+            'node_version' => [
                 'type' => 'select',
-                'options' => ['v20.10.0', 'v18.18.2', 'v16.20.2'],
+                'options' => ['v24.11.0', 'v22.21.0', 'v20.20.0'],
             ],
-            'start_script' => ['type'=>'text', 'placeholder'=>'npm run start'],
+            'start_script' => ['type' => 'text', 'placeholder' => 'npm run start'],
             'port' => ['type' => 'text', 'placeholder' => '3000'],
         ],
         'database' => false,
         'server' => [
             'php' => [
-                'supported' => [ '7.2','7.3','7.4','8.0','8.1','8.2' ],
+                'supported' => ['8.1', '8.2', '8.3', '8.4'],
             ]
         ],
     ];
@@ -61,13 +61,18 @@ class NodeJsSetup extends BaseSetup {
     }
 
 	public function createAppEntryPoint(array $options = null) {
-		$templateReplaceVars = [$this->domain, trim($options['start_script']), $this->nodeJsPaths->getAppDir($this->domain)];
-		
+		$templateReplaceVars = [
+			$this->domain,
+			trim($options['start_script']),
+			$this->nodeJsPaths->getAppDir($this->domain),
+			trim($options['port'])
+		];
+
 		$data = $this->nodeJsUtils->parseTemplate($this->nodeJsPaths->getAppEntrypointTemplate(), self::TEMPLATE_ENTRYPOINT_VARS, $templateReplaceVars);
 		$tmpFile = $this->saveTempFile(implode($data));
 
 		return $this->nodeJsUtils->moveFile(
-			$tmpFile, 
+			$tmpFile,
 			$this->nodeJsPaths->getAppEntryPoint($this->domain)
 		);
 	}

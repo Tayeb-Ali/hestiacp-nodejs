@@ -2,9 +2,9 @@
 # info: add web to PM2
 # options: USER DOMAIN ENTRYPOINT
 #
-# example: v-add-pm2-app admin wonderland.com
+# example: v-add-pm2-app admin wonderland.com ecosystem.config.js
 #
-# This function adds an installed app to pm2
+# This function adds an installed app to pm2 using ecosystem.config.js
 #----------------------------------------------------------#
 #                Variables & Functions                     #
 #----------------------------------------------------------#
@@ -44,6 +44,19 @@ is_base_domain_owner "$domain"
 
 # Perform verification if read-only mode is enabled
 check_hestia_demo_mode
+
+# Check if PM2 is installed
+if ! command -v pm2 &> /dev/null; then
+    echo "Error: PM2 is not installed. Please install PM2 first: npm install -g pm2"
+    exit 1
+fi
+
+# Check if entrypoint file exists
+app_path="$HOMEDIR/$user/web/$domain/private/nodeapp/$entrypoint"
+if [ ! -f "$app_path" ]; then
+    echo "Error: Entrypoint file not found: $app_path"
+    exit 1
+fi
 
 #----------------------------------------------------------#
 #                       Action                             #
